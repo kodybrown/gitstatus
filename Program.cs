@@ -37,11 +37,13 @@ namespace gitstatus
 			}
 
 			lines = RunCommand(git, "status");
-			if (lines == null || lines.Length == 0) return 2;
+			if (lines == null || lines.Length == 0)
+				return 2;
 
 			ConsoleKeyInfo k;
-			bool cancel = false;
-			bool notStaged = false;
+			bool cancel = false,
+				notStaged = false,
+				untrackedFiles = false;
 			List<string> files = new List<string>();
 
 			Console.WriteLine("-------------------------------------------------------------------------------");
@@ -55,10 +57,64 @@ namespace gitstatus
 			for (int i = 0; i < lines.Length; i++) {
 				string l = lines[i].Trim();
 
-				if (notStaged) {
+				if (l.Equals("# Changes not staged for commit:")) {
+					Console.WriteLine(l);
+					notStaged = true;
+					untrackedFiles = false;
+				} else if (l.Equals("# Untracked files:")) {
+					Console.WriteLine(l);
+					notStaged = false;
+					untrackedFiles = true;
+				} else if (untrackedFiles) {
+					if (l.StartsWith("#\t")) {
+						string fname = l.Substring(2).Trim();
+						string star;
+						int left;
+
+						Console.CursorLeft = 0;
+						Console.Write("#\t");
+						Console.ForegroundColor = defaultColor;
+						Console.Write("   [");
+						left = Console.CursorLeft;
+						Console.Write(" ] ");
+						Console.ForegroundColor = notStagedColor;
+						Console.Write(fname);
+						Console.ForegroundColor = defaultColor;
+						Console.CursorLeft = left;
+
+						star = " ";
+						while (true) {
+							k = Console.ReadKey(true);
+							if (k.Key == ConsoleKey.Q || k.Key == ConsoleKey.Escape) {
+								cancel = true;
+								break;
+							} else if (k.Key == ConsoleKey.Spacebar || k.Key == ConsoleKey.Y) {
+								files.Add(fname);
+								star = "*";
+								break;
+							} else if (k.Key == ConsoleKey.D) {
+								// Diff!
+								RunCommand(git, string.Format("difftool \"{0}\"", fname));
+							} else {
+								star = " ";
+								break;
+							}
+						}
+						if (cancel) {
+							break;
+						}
+
+						Console.CursorLeft = 0;
+						Console.Write("#\t");
+						Console.ForegroundColor = defaultColor;
+						Console.Write("   [{0}] ", star);
+						Console.ForegroundColor = notStagedColor;
+						Console.WriteLine(fname);
+						Console.ForegroundColor = defaultColor;
+					}
+				} else if (notStaged) {
 					if (l.StartsWith("#\tmodified:")
 							|| l.StartsWith("#\tnew file:")) { // || l.StartsWith("#       deleted:")
-
 						int pos = l.IndexOf(':');
 						string cmd = l.Substring(1, pos + 1).Trim();
 						string fname = l.Substring(pos + 1).Trim();
@@ -109,17 +165,13 @@ namespace gitstatus
 						Console.ForegroundColor = notStagedColor;
 						Console.WriteLine(fname);
 						Console.ForegroundColor = defaultColor;
-
 					} else if (l.Equals("#")) {
 						Console.WriteLine(l);
 					} else {
 						Console.WriteLine(l);
 					}
 				} else {
-					if (l.Equals("# Changes not staged for commit:")) {
-						Console.WriteLine(l);
-						notStaged = true;
-					} else if (l.StartsWith("#\tmodified:")
+					if (l.StartsWith("#\tmodified:")
 							|| l.StartsWith("#\tnew file:")) { // || l.StartsWith("#       deleted:")
 
 						int pos = l.IndexOf(':');

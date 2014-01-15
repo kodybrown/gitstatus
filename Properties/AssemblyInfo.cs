@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("gitstatus")]
-[assembly: AssemblyCopyright("Copyright © 2013 Kody Brown. Released under the MIT License.")]
+[assembly: AssemblyCopyright("Copyright (C) 2013-2014 Kody Brown. Released under the MIT License.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
