@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace gitstatus
+namespace gitdiff
 {
 	class Program
 	{
@@ -35,9 +35,8 @@ namespace gitstatus
 			Console.WriteLine("-------------------------------------------------------------------------------");
 			Console.WriteLine("  Legend:");
 			Console.WriteLine("    Escape|Q to cancel.");
-			Console.WriteLine("    Spacebar|Y to check file for adding.");
 			Console.WriteLine("    D runs 'git difftool fname'. (`difftool` must launch an external diff tool!)");
-			Console.WriteLine("    Any other key leaves file unchecked (will not be added).");
+			Console.WriteLine("    Any other key goes to the next file.");
 			Console.WriteLine("-------------------------------------------------------------------------------");
 
 			for (int i = 0; i < lines.Length; i++) {
